@@ -1,10 +1,12 @@
 import { DbClient } from "../db";
 
-export const transactionRepository = {
-  create(client: DbClient, data: { accountId: number; value: number }) {
+
+  export const create = (client: DbClient, data: { accountId: number; value: number }) => {
     return client.transaction.create({ data });
-  },
-  findByAccount(client: DbClient, accountId: number, range?: { gte?: Date; lte?: Date }) {
+  };
+
+
+  export const findByAccount = (client: DbClient, accountId: number, range?: { gte?: Date; lte?: Date }) => {
     return client.transaction.findMany({
       where: {
         accountId,
@@ -12,8 +14,10 @@ export const transactionRepository = {
       },
       orderBy: { transactionDate: "desc" },
     });
-  },
-  sumWithdrawalsForDay(client: DbClient, accountId: number, start: Date, end: Date) {
+  };
+
+
+  export const sumWithdrawalsForDay = (client: DbClient, accountId: number, start: Date, end: Date) => {
     return client.transaction.aggregate({
       where: {
         accountId,
@@ -22,5 +26,5 @@ export const transactionRepository = {
       },
       _sum: { value: true },
     });
-  },
-};
+  };
+

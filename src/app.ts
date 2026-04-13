@@ -1,18 +1,20 @@
 import express from "express";
-import * as accountController   from "./controllers/accountController";
+import swaggerUi from 'swagger-ui-express';
+import * as swaggerDocument from './swagger.json';
+import accountRoutes from './routes/accountRouts'; // Import your new routes file
+import * as accountController from './controllers/accountController';
 
 export const app = express();
+
 app.use(express.json());
 
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 app.get("/health", accountController.health);
+app.use('/accounts', accountRoutes);
 
-app.post("/accounts", accountController.createAccount);
-app.get("/accounts/:id/balance", accountController.getBalance);
-app.post("/accounts/:id/deposit", accountController.deposit);
-app.post("/accounts/:id/withdraw", accountController.withdraw);
-app.patch("/accounts/:id/block", accountController.block);
-app.get("/accounts/:id/statement", accountController.statement);
-
+// 4. Global Error Handler (Keep this at the very bottom!)
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   const message = err instanceof Error ? err.message : "Unexpected error";
   res.status(500).json({ error: message });

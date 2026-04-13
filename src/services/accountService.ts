@@ -1,7 +1,7 @@
 import { withClient, withTransaction } from "../db";
-import { accountRepository } from "../repositories/accountRepository";
-import { personRepository } from "../repositories/personRepository";
-import { transactionRepository } from "../repositories/transactionRepository";
+import * as accountRepository  from "../repositories/accountRepository";
+import * as personRepository  from "../repositories/personRepository";
+import * as transactionRepository  from "../repositories/transactionRepository";
 
 export type CreateAccountInput = {
   personId: number;
@@ -89,8 +89,11 @@ export const getBalance = async (accountId: number) =>
     return account.balance;
   });
 
+
+
 export const deposit = async (accountId: number, amount: number) =>
   withTransaction(async (client) => {
+
     const account = await accountRepository.findById(client, accountId);
     if (!account) throw new Error("Account not found");
     if (!account.activeFlag) throw new Error("Account is blocked");
@@ -104,7 +107,9 @@ export const deposit = async (accountId: number, amount: number) =>
   });
 
 export const withdraw = async (accountId: number, amount: number) =>
+
   withTransaction(async (client) => {
+
     const account = await accountRepository.findById(client, accountId);
     if (!account) throw new Error("Account not found");
     if (!account.activeFlag) throw new Error("Account is blocked");
@@ -131,6 +136,7 @@ export const blockAccount = async (accountId: number) =>
   withClient((client) => accountRepository.block(client, accountId));
 
 export const getStatement = async (accountId: number, from?: string, to?: string) =>
+
   withClient(async (client) => {
     const account = await accountRepository.findById(client, accountId);
     if (!account) throw new Error("Account not found");
@@ -153,3 +159,9 @@ export const getStatement = async (accountId: number, from?: string, to?: string
     const transactions = await transactionRepository.findByAccount(client, accountId, range);
     return { accountId, transactions };
   });
+
+
+  
+
+  export const unblockAccount = async (accountId: number) =>
+  withClient((client) => accountRepository.unblock(client, accountId));
