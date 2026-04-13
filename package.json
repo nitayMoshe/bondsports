@@ -1,0 +1,39 @@
+{
+  "name": "bondsports",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "prisma:generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "db:init": "npx prisma db execute --schema prisma/schema.prisma --file prisma/schema.sql && npx prisma db execute --schema prisma/schema.prisma --file prisma/seed.sql",
+    "seed": "ts-node-dev --transpile-only prisma/seed.ts",
+    "test": "echo \"No tests yet\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nitayMoshe/bondsports.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nitayMoshe/bondsports/issues"
+  },
+  "homepage": "https://github.com/nitayMoshe/bondsports#readme",
+  "dependencies": {
+    "@prisma/client": "^6.8.1",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.6.0",
+    "dotenv": "^17.4.2",
+    "prisma": "^6.8.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^6.0.2"
+  }
+}
