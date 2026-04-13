@@ -25,10 +25,7 @@ once the project is downloaded, all you need to do is run these commanfs on the 
 
 - npm install (install dependencies)
 - npm run prisma:generate (auto generate the prisma doc)
-- npm run migrate (builds db structure based on the schema)
-# If migrate fails u can use:
-# npm run db:init
-- npm run seed (populates the db with 1 person)
+- npm run db:init (builds db structure + seed)
 - npm run dev (starting server)
 
 
@@ -37,7 +34,6 @@ Server runs on `http://localhost:3000` on default.
 ## Database
 - SQLite file is at `prisma/dev.db`.
 - Seed script creates  one person .
-- SQL seed is at `prisma/seed.sql`.
 
 
 
