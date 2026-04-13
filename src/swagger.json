@@ -1,0 +1,33 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Banking API",
+    "version": "1.0.0",
+    "description": "API for managing accounts and transactions"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "check the server is running",
+        "responses": {
+          "200": {
+  "description": "Server is healthy and reachable",
+  "content": {
+    "application/json": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok"
+          }
+        }
+      }
+    }
+  }
+}
+        }
+      }
+}
+  }
+}

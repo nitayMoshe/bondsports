@@ -42,6 +42,10 @@ import * as  accountService from "../services/accountService";
       return res.status(status).json({ error: message });
     }
   };
+
+
+
+
   export const  getBalance = async (req: Request, res: Response) => {
     const accountId = Number(req.params.id);
     if (!Number.isInteger(accountId)) {
@@ -57,6 +61,8 @@ import * as  accountService from "../services/accountService";
       return res.status(status).json({ error: message });
     }
   };
+
+
   export const deposit = async (req: Request, res: Response) => {
     const accountId = Number(req.params.id);
     if (!Number.isInteger(accountId)) {
@@ -84,6 +90,8 @@ import * as  accountService from "../services/accountService";
     }
   };
 
+
+
   export const withdraw = async (req: Request, res: Response) => {
     const accountId = Number(req.params.id);
     if (!Number.isInteger(accountId)) {
@@ -104,6 +112,7 @@ import * as  accountService from "../services/accountService";
     try {
       const result = await accountService.withdraw(accountId, amount);
       return res.json(result);
+
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unexpected error";
       const status = message === "Account not found" ? 404 : 400;
@@ -128,6 +137,23 @@ import * as  accountService from "../services/accountService";
   };
 
 
+
+
+    export const unblock = async (req: Request, res: Response) => {
+    const accountId = Number(req.params.id);
+    if (!Number.isInteger(accountId)) {
+      return res.status(400).json({ error: "Invalid account id" });
+    }
+
+    try {
+      const account = await accountService.unblockAccount(accountId);
+      return res.json(account);
+    } catch {
+      return res.status(404).json({ error: "Account not found" });
+    }
+  };
+
+
   export const statement = async  (req: Request, res: Response) => {
     const accountId = Number(req.params.id);
     if (!Number.isInteger(accountId)) {
@@ -140,6 +166,7 @@ import * as  accountService from "../services/accountService";
     try {
       const result = await accountService.getStatement(accountId, from, to);
       return res.json(result);
+
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unexpected error";
       const status = message === "Account not found" ? 404 : 400;
