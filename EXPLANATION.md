@@ -17,3 +17,6 @@ my philosofy with AI usage in coding is the one I learned in the army. when the 
 5 - there is no blind copy - paste from the AI chat. you read the code, understanf it, ask questions - than you can write it yourself into the project
 
 in simple terms - AI is NOT writing your code. its basically a faster, more personalized version of stack overflow ( RIP :(  )
+
+## Swagger
+since this project is only backend, I wanted reviewers to have a friendly way to check the server. I remembered I once used a tool called Swagger on one of my projects. I read about it a bit to see I remember how to use it and asked Geemini if there's a similar tool that would be a better fit to my project that I never heard of. when I saw Swagger is my best choice, I added it to my project. its designed to be added in a simple manner that doesnt effect the architecture so adding it was a simple choice of UX, not an actual architectual decision.
