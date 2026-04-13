@@ -9,9 +9,11 @@
     "start": "node dist/index.js",
     "prisma:generate": "prisma generate",
     "migrate": "prisma migrate dev",
-    "db:init": "npx prisma db execute --schema prisma/schema.prisma --file prisma/schema.sql && npx prisma db execute --schema prisma/schema.prisma --file prisma/seed.sql",
+    "db:init": "ts-node-dev --transpile-only prisma/init.ts",
     "seed": "ts-node-dev --transpile-only prisma/seed.ts",
-    "test": "echo \"No tests yet\""
+    "test": "echo \"No tests yet\"",
+    "setup": "npm install && npm run prisma:generate && npm run db:init",
+    "db:reset": "powershell -NoProfile -Command \"if (Test-Path .\\prisma\\dev.db) { Remove-Item .\\prisma\\dev.db }\" && npm run db:init"
   },
   "repository": {
     "type": "git",

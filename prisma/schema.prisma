@@ -25,6 +25,7 @@ model Account {
   activeFlag           Boolean       @default(true)
   accountType          Int
   createDate           DateTime      @default(now())
+  version              Int           @default(1)
   person               Person        @relation(fields: [personId], references: [personId])
   transactions         Transaction[]
 }
