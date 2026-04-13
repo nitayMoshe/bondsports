@@ -26,6 +26,7 @@ once the project is downloaded, all you need to do is run these commanfs on the 
 - npm install (install dependencies)
 - npm run prisma:generate (auto generate the prisma doc)
 - npm run db:init (builds db structure + seed)
+note: the 3 commands above can be run together using the "npm run setup" command I created
 - npm run dev (starting server)
 
 
