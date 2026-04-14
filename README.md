@@ -32,6 +32,8 @@ note: the 3 commands above can be run together using the "npm run setup" command
 
 Server runs on `http://localhost:3000` on default.
 
+(if you encounter "Module not found" errors - try tunning the *npm run prisma:generate* command)
+
 ## Playing with the server
 once the server is runnning, you can change and read data in a simple way through 2 tools I implemented:
 Swagger - a nice UI to run commands
