@@ -30,6 +30,17 @@ in this project I decided to implement an optimistic locking mechanism by adding
 I wanted to be sure Im taking the safe approach representing the money in the DB. after some reading and research, turnes out representing the money as *float* numbers is a very bad idea, since JS looses percision when calculating numbers represented as *float*. so I decided I had to use *integers* to represent the money. in that case, in order to support fractions (cents for example), a number in the DB must represent the smallest coin possible in the country (cents in USA, or agora in Israel). that way, we keep money representation safe while still being able to handle small money ("change"). 
 the final decision was that money will be represented in the DB as *integer*, while the coin represented is "cents" and not "dollars".
 
+## Automated Testing
+Testing is very important for banking applications to make sure business rules are never violated. I implemented two types of testing using Jest and Supertest:
+Unit Tests (/accountService.test.ts): These tests focus on isolated logic, such as ensuring the  date parser handles the specific DD/MM/YYYY format correctly and that our money parser strictly enforces integer-only values.
+Integration Tests (/banking.test.ts): These simulate real-world users. They verify that the entire system works in harmony. These tests prove that critical business rules are active, such as:
+Preventing withdrawals when there are insufficient funds.
+Ensuring transactions are blocked when an account has been manually blocked by an admin.
+Verifying that deposits and balance inquiries reflect real-time database state.
+
+By implementing these, I’ve made sure that any future code changes or added code won't accidentally break the core banking logic.
+of caurse, tests needs to be updated and added as the project grows and changes.
+
 ## Future Improvements
 There are several improvements I would add in the future to keep the project cleaner and more scalable:
 1 - Input Validation: the code currently validates inputs manually in the controller (e.g. - if (typeof personId !== "number")).
