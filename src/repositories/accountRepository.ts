@@ -12,23 +12,24 @@ import { DbClient } from "../db";
       dailyWithdrawalLimit: number;
       accountType: number;
       balance: number;
+      version: number;
     }
   )  => {
     return client.account.create({ data });
   };
 
   
-  export const updateBalance = (client: DbClient, accountId: number, balance: number) => {
-    return client.account.update({ where: { accountId }, data: { balance } });
+  export const updateBalance = (client: DbClient, accountId: number, balance: number, version: number) => {
+    return client.account.update({ where: { accountId, version: version }, data: { balance, version: {increment: 1} } });
   };
 
 
-  export const block = (client: DbClient, accountId: number) => {
-    return client.account.update({ where: { accountId }, data: { activeFlag: false } });
+  export const block = (client: DbClient, accountId: number, version: number) => {
+    return client.account.update({ where: { accountId, version }, data: { activeFlag: false, version: {increment: 1} } });
   };
 
 
-    export const unblock = (client: DbClient, accountId: number) => {
-    return client.account.update({ where: { accountId }, data: { activeFlag: true } });
+    export const unblock = (client: DbClient, accountId: number, version: number) => {
+    return client.account.update({ where: { accountId, version }, data: { activeFlag: true, version: {increment: 1}} });
   };
 

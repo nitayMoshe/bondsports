@@ -68,6 +68,7 @@ export const createAccount = async (input: CreateAccountInput) =>
       dailyWithdrawalLimit: input.dailyWithdrawalLimit,
       accountType: input.accountType,
       balance: input.initialBalance ?? 0,
+      version: 1
     });
 
     if ((input.initialBalance ?? 0) > 0) {
@@ -99,11 +100,20 @@ export const deposit = async (accountId: number, amount: number) =>
     if (!account.activeFlag) throw new Error("Account is blocked");
 
     const newBalance = account.balance + amount;
-    const updated = await accountRepository.updateBalance(client, accountId, newBalance);
+
+    try {
+          const updated = await accountRepository.updateBalance(client, accountId, newBalance, account.version);
 
     await transactionRepository.create(client, { accountId, value: amount });
 
     return updated;
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        throw new Error("Conflict: The account was updated by another request. Please try again.");
+      }
+      throw error;
+    }
+
   });
 
 export const withdraw = async (accountId: number, amount: number) =>
@@ -125,15 +135,41 @@ export const withdraw = async (accountId: number, amount: number) =>
     }
 
     const newBalance = account.balance - amount;
-    const updated = await accountRepository.updateBalance(client, accountId, newBalance);
+
+    try {
+        const updated = await accountRepository.updateBalance(client, accountId, newBalance, account.version);
 
     await transactionRepository.create(client, { accountId, value: -amount });
 
     return updated;
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        throw new Error("Conflict: The account was updated by another request. Please try again.");
+      }
+      throw error;
+    }
+  
   });
 
 export const blockAccount = async (accountId: number) =>
-  withClient((client) => accountRepository.block(client, accountId));
+  withTransaction( async (client) => {
+    const account = await accountRepository.findById(client, accountId);
+    if (!account) {
+      throw new Error("Account not found");
+    }
+
+    try {
+      return await accountRepository.block(client, accountId, account.version);
+
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        throw new Error("Conflict: The account status was modified by another process. Please try again.");
+      }
+      throw error;
+    }
+}  );
+  
+
 
 export const getStatement = async (accountId: number, from?: string, to?: string) =>
 
@@ -164,4 +200,19 @@ export const getStatement = async (accountId: number, from?: string, to?: string
   
 
   export const unblockAccount = async (accountId: number) =>
-  withClient((client) => accountRepository.unblock(client, accountId));
+ withTransaction( async (client) => {
+    const account = await accountRepository.findById(client, accountId);
+    if (!account) {
+      throw new Error("Account not found");
+    }
+
+    try {
+      return await accountRepository.unblock(client, accountId, account.version);
+
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        throw new Error("Conflict: The account status was modified by another process. Please try again.");
+      }
+      throw error;
+    }
+} );
