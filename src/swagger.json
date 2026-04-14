@@ -245,7 +245,7 @@
         "required": ["personId", "dailyWithdrawalLimit", "accountType"],
         "properties": {
           "personId": { "type": "integer", "example": 1 },
-          "dailyWithdrawalLimit": { "type": "integer", "example": 500 },
+          "dailyWithdrawalLimit": { "type": "integer", "example": 5000 },
           "accountType": { "type": "integer", "example": 1 },
           "initialBalance": { "type": "integer", "example": 1000 }
         }
@@ -263,7 +263,7 @@
           "accountId": { "type": "integer", "example": 1 },
           "personId": { "type": "integer", "example": 1 },
           "balance": { "type": "integer", "example": 800 },
-          "dailyWithdrawalLimit": { "type": "integer", "example": 500 },
+          "dailyWithdrawalLimit": { "type": "integer", "example": 5000 },
           "activeFlag": { "type": "boolean", "example": true },
           "accountType": { "type": "integer", "example": 1 },
           "createDate": { "type": "string", "format": "date-time" }

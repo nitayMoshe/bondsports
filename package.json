@@ -11,7 +11,7 @@
     "migrate": "prisma migrate dev",
     "db:init": "ts-node-dev --transpile-only prisma/init.ts",
     "seed": "ts-node-dev --transpile-only prisma/seed.ts",
-    "test": "echo \"No tests yet\"",
+    "test": "jest",
     "setup": "npm install && npm run prisma:generate && npm run db:init",
     "db:reset": "powershell -NoProfile -Command \"if (Test-Path .\\prisma\\dev.db) { Remove-Item .\\prisma\\dev.db }\" && npm run db:init"
   },
@@ -34,11 +34,16 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
     "@types/node": "^25.6.0",
+    "@types/supertest": "^7.2.0",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "dotenv": "^17.4.2",
+    "jest": "^30.3.0",
     "prisma": "^6.8.1",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.9",
     "ts-node-dev": "^2.0.0",
     "typescript": "^6.0.2"
   }
