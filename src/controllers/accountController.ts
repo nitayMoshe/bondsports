@@ -1,194 +1,113 @@
 import { Request, Response } from "express";
-import * as  accountService from "../services/accountService";
+import * as accountService from "../services/accountService";
+import { ValidationError } from "../utils/AppError";
 
+export const health = (_req: Request, res: Response) => {
+  res.json({ status: "ok" });
+};
 
-  export const health = (_req: Request, res: Response) => {
-    res.json({ status: "ok" });
-  };
-  export const  createAccount = async (req: Request, res: Response) => {
-    const { personId, dailyWithdrawalLimit, accountType, initialBalance } = req.body ?? {};
+export const createAccount = async (req: Request, res: Response) => {
+  const { personId, dailyWithdrawalLimit, accountType, initialBalance } = req.body ?? {};
 
-    if (typeof personId !== "number" || typeof accountType !== "number") {
-      return res.status(400).json({ error: "personId and accountType must be numbers" });
-    }
-
-    let limit: number;
-    try {
-      limit = accountService.parseAmount(dailyWithdrawalLimit);
-    } catch (err) {
-      return res.status(400).json({ error: (err as Error).message });
-    }
-
-    let openingBalance = 0;
-    if (initialBalance !== undefined && initialBalance !== null) {
-      try {
-        openingBalance = accountService.parseAmount(initialBalance);
-      } catch (err) {
-        return res.status(400).json({ error: (err as Error).message });
-      }
-    }
-
-    try {
-      const account = await accountService.createAccount({
-        personId,
-        dailyWithdrawalLimit: limit,
-        accountType,
-        initialBalance: openingBalance,
-      });
-      return res.status(201).json(account);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Unexpected error";
-      const status = message === "Person not found" ? 404 : 400;
-      return res.status(status).json({ error: message });
-    }
-  };
-
-
-
-
-  export const  getBalance = async (req: Request, res: Response) => {
-    const accountId = Number(req.params.id);
-    if (!Number.isInteger(accountId)) {
-      return res.status(400).json({ error: "Invalid account id" });
-    }
-
-    try {
-      const balance = await accountService.getBalance(accountId);
-      return res.json({ accountId, balance });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Unexpected error";
-      const status = message === "Account not found" ? 404 : 400;
-      return res.status(status).json({ error: message });
-    }
-  };
-
-
-  export const deposit = async (req: Request, res: Response) => {
-    const accountId = Number(req.params.id);
-    if (!Number.isInteger(accountId)) {
-      return res.status(400).json({ error: "Invalid account id" });
-    }
-
-    let amount: number;
-    try {
-      amount = accountService.parseAmount(req.body?.amount);
-    } catch (err) {
-      return res.status(400).json({ error: (err as Error).message });
-    }
-
-    if (amount <= 0) {
-      return res.status(400).json({ error: "Deposit amount must be greater than 0" });
-    }
-
-    try {
-      const result = await accountService.deposit(accountId, amount);
-      return res.json(result);
-    } catch (err: any) {
-      const message = err instanceof Error ? err.message : "Unexpected error";
-      if (message.includes("Conflict")) {
-      return res.status(409).json({ error: message });
-    }
-    
-      const status = message === "Account not found" ? 404 : 400;
-      return res.status(status).json({ error: message });
-    }
-  };
-
-
-
-  export const withdraw = async (req: Request, res: Response) => {
-    const accountId = Number(req.params.id);
-    if (!Number.isInteger(accountId)) {
-      return res.status(400).json({ error: "Invalid account id" });
-    }
-
-    let amount: number;
-    try {
-      amount = accountService.parseAmount(req.body?.amount);
-    } catch (err) {
-      return res.status(400).json({ error: (err as Error).message });
-    }
-
-    if (amount <= 0) {
-      return res.status(400).json({ error: "Withdrawal amount must be greater than 0" });
-    }
-
-    try {
-      const result = await accountService.withdraw(accountId, amount);
-      return res.json(result);
-
-    } catch (err: any) {
-      const message = err instanceof Error ? err.message : "Unexpected error";
-      if (message.includes("Conflict")) {
-      return res.status(409).json({ error: message });
-    }
-     const status = message === "Account not found" ? 404 : 400;
-      return res.status(status).json({ error: message });
-    }
-  };
-
-
-
-  export const block = async (req: Request, res: Response) => {
-    const accountId = Number(req.params.id);
-    if (!Number.isInteger(accountId)) {
-      return res.status(400).json({ error: "Invalid account id" });
-    }
-
-    try {
-      const account = await accountService.blockAccount(accountId);
-      return res.json(account);
-    } catch (err: any){
-      const message = err instanceof Error ? err.message : "Unexpected error";
-      if (message.includes("Conflict")) {
-      return res.status(409).json({ error: message });
-    }
-    const status = message === "Account not found" ? 404 : 400;
-    return res.status(status).json({ error: message });
-      
-    }
-  };
-
-
-
-
-    export const unblock = async (req: Request, res: Response) => {
-    const accountId = Number(req.params.id);
-    if (!Number.isInteger(accountId)) {
-      return res.status(400).json({ error: "Invalid account id" });
-    }
-
-    try {
-      const account = await accountService.unblockAccount(accountId);
-      return res.json(account);
-    } catch (err: any){
-      const message = err instanceof Error ? err.message : "Unexpected error";
-      if (message.includes("Conflict")) {
-      return res.status(409).json({ error: message });
-    }
-    const status = message === "Account not found" ? 404 : 400;
-    return res.status(status).json({ error: message });
-    }
-  };
-
-
-  export const statement = async  (req: Request, res: Response) => {
-    const accountId = Number(req.params.id);
-    if (!Number.isInteger(accountId)) {
-      return res.status(400).json({ error: "Invalid account id" });
-    }
-
-    const from = req.query.from ? String(req.query.from) : undefined;
-    const to = req.query.to ? String(req.query.to) : undefined;
-
-    try {
-      const result = await accountService.getStatement(accountId, from, to);
-      return res.json(result);
-
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Unexpected error";
-      const status = message === "Account not found" ? 404 : 400;
-      return res.status(status).json({ error: message });
-    }
+  if (typeof personId !== "number" || typeof accountType !== "number") {
+    throw new ValidationError("personId and accountType must be numbers");
   }
 
+  // If parseAmount fails, it now throws a ValidationError which goes straight to the global handler
+  const limit = accountService.parseAmount(dailyWithdrawalLimit);
+
+  let openingBalance = 0;
+  if (initialBalance !== undefined && initialBalance !== null) {
+    openingBalance = accountService.parseAmount(initialBalance);
+  }
+
+  const account = await accountService.createAccount({
+    personId,
+    dailyWithdrawalLimit: limit,
+    accountType,
+    initialBalance: openingBalance,
+  });
+  
+  res.status(201).json(account);
+};
+
+export const getBalance = async (req: Request, res: Response) => {
+  const accountId = Number(req.params.id);
+  
+  if (!Number.isInteger(accountId)) {
+    throw new ValidationError("Invalid account id");
+  }
+
+  const balance = await accountService.getBalance(accountId);
+  res.json({ accountId, balance });
+};
+
+export const deposit = async (req: Request, res: Response) => {
+  const accountId = Number(req.params.id);
+  
+  if (!Number.isInteger(accountId)) {
+    throw new ValidationError("Invalid account id");
+  }
+
+  const amount = accountService.parseAmount(req.body?.amount);
+
+  if (amount <= 0) {
+    throw new ValidationError("Deposit amount must be greater than 0");
+  }
+
+  const result = await accountService.deposit(accountId, amount);
+  res.json(result);
+};
+
+export const withdraw = async (req: Request, res: Response) => {
+  const accountId = Number(req.params.id);
+  
+  if (!Number.isInteger(accountId)) {
+    throw new ValidationError("Invalid account id");
+  }
+
+  const amount = accountService.parseAmount(req.body?.amount);
+
+  if (amount <= 0) {
+    throw new ValidationError("Withdrawal amount must be greater than 0");
+  }
+
+  const result = await accountService.withdraw(accountId, amount);
+  res.json(result);
+};
+
+export const block = async (req: Request, res: Response) => {
+  const accountId = Number(req.params.id);
+  
+  if (!Number.isInteger(accountId)) {
+    throw new ValidationError("Invalid account id");
+  }
+
+  const account = await accountService.blockAccount(accountId);
+  res.json(account);
+};
+
+export const unblock = async (req: Request, res: Response) => {
+  const accountId = Number(req.params.id);
+  
+  if (!Number.isInteger(accountId)) {
+    throw new ValidationError("Invalid account id");
+  }
+
+  const account = await accountService.unblockAccount(accountId);
+  res.json(account);
+};
+
+export const statement = async (req: Request, res: Response) => {
+  const accountId = Number(req.params.id);
+  
+  if (!Number.isInteger(accountId)) {
+    throw new ValidationError("Invalid account id");
+  }
+
+  const from = req.query.from ? String(req.query.from) : undefined;
+  const to = req.query.to ? String(req.query.to) : undefined;
+
+  const result = await accountService.getStatement(accountId, from, to);
+  res.json(result);
+};

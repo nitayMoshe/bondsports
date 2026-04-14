@@ -2,6 +2,7 @@ import { withClient, withTransaction } from "../db";
 import * as accountRepository  from "../repositories/accountRepository";
 import * as personRepository  from "../repositories/personRepository";
 import * as transactionRepository  from "../repositories/transactionRepository";
+import { NotFoundError, ConflictError, ValidationError } from "../utils/AppError";
 
 export type CreateAccountInput = {
   personId: number;
@@ -12,14 +13,14 @@ export type CreateAccountInput = {
 
 const toAmount = (value: unknown) => {
   if (value === null || value === undefined || value === "") {
-    throw new Error("Amount is required");
+    throw new ValidationError("Amount is required");
   }
   const numberValue = Number(value);
   if (!Number.isFinite(numberValue)) {
-    throw new Error("Invalid amount");
+    throw new ValidationError("Invalid amount");
   }
   if (!Number.isInteger(numberValue)) {
-    throw new Error("Amount must be an integer value");
+    throw new ValidationError("Amount must be an integer value");
   }
   return numberValue;
 };
@@ -33,7 +34,8 @@ const getDayRange = (date: Date) => {
 };
 
 const parseDateDMY = (value: string) => {
-  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+
+  const match = /^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/.exec(value);
   if (!match) {
     return null;
   }
@@ -60,7 +62,7 @@ export const createAccount = async (input: CreateAccountInput) =>
   withTransaction(async (client) => {
     const person = await personRepository.findById(client, input.personId);
     if (!person) {
-      throw new Error("Person not found");
+      throw new NotFoundError("Person not found");
     }
 
     const account = await accountRepository.create(client, {
@@ -85,7 +87,7 @@ export const getBalance = async (accountId: number) =>
   withClient(async (client) => {
     const account = await accountRepository.findById(client, accountId);
     if (!account) {
-      throw new Error("Account not found");
+      throw new NotFoundError("Account not found");
     }
     return account.balance;
   });
@@ -96,8 +98,8 @@ export const deposit = async (accountId: number, amount: number) =>
   withTransaction(async (client) => {
 
     const account = await accountRepository.findById(client, accountId);
-    if (!account) throw new Error("Account not found");
-    if (!account.activeFlag) throw new Error("Account is blocked");
+    if (!account) throw new NotFoundError("Account not found");
+    if (!account.activeFlag) throw new ValidationError("Account is blocked");
 
     const newBalance = account.balance + amount;
 
@@ -109,7 +111,7 @@ export const deposit = async (accountId: number, amount: number) =>
     return updated;
     } catch (error: any) {
       if (error.code === 'P2025') {
-        throw new Error("Conflict: The account was updated by another request. Please try again.");
+        throw new ConflictError("Conflict: The account was updated by another request. Please try again.");
       }
       throw error;
     }
@@ -121,9 +123,9 @@ export const withdraw = async (accountId: number, amount: number) =>
   withTransaction(async (client) => {
 
     const account = await accountRepository.findById(client, accountId);
-    if (!account) throw new Error("Account not found");
-    if (!account.activeFlag) throw new Error("Account is blocked");
-    if (account.balance < amount) throw new Error("Insufficient funds");
+    if (!account) throw new NotFoundError("Account not found");
+    if (!account.activeFlag) throw new ValidationError("Account is blocked");
+    if (account.balance < amount) throw new ValidationError("Insufficient funds");
 
     const { start, end } = getDayRange(new Date());
     const sum = await transactionRepository.sumWithdrawalsForDay(client, accountId, start, end);
@@ -131,7 +133,7 @@ export const withdraw = async (accountId: number, amount: number) =>
     const withdrawnToday = sum._sum.value ? Math.abs(sum._sum.value) : 0;
     const proposedTotal = withdrawnToday + amount;
     if (proposedTotal > account.dailyWithdrawalLimit) {
-      throw new Error("Daily withdrawal limit exceeded");
+      throw new ValidationError("Daily withdrawal limit exceeded");
     }
 
     const newBalance = account.balance - amount;
@@ -144,7 +146,7 @@ export const withdraw = async (accountId: number, amount: number) =>
     return updated;
     } catch (error: any) {
       if (error.code === 'P2025') {
-        throw new Error("Conflict: The account was updated by another request. Please try again.");
+        throw new ConflictError("Conflict: The account was updated by another request. Please try again.");
       }
       throw error;
     }
@@ -155,7 +157,7 @@ export const blockAccount = async (accountId: number) =>
   withTransaction( async (client) => {
     const account = await accountRepository.findById(client, accountId);
     if (!account) {
-      throw new Error("Account not found");
+      throw new NotFoundError("Account not found");
     }
 
     try {
@@ -163,7 +165,7 @@ export const blockAccount = async (accountId: number) =>
 
     } catch (error: any) {
       if (error.code === 'P2025') {
-        throw new Error("Conflict: The account status was modified by another process. Please try again.");
+        throw new ConflictError("Conflict: The account status was modified by another process. Please try again.");
       }
       throw error;
     }
@@ -175,19 +177,19 @@ export const getStatement = async (accountId: number, from?: string, to?: string
 
   withClient(async (client) => {
     const account = await accountRepository.findById(client, accountId);
-    if (!account) throw new Error("Account not found");
+    if (!account) throw new NotFoundError("Account not found");
 
     let range: { gte?: Date; lte?: Date } | undefined;
     if (from || to) {
       range = {};
       if (from) {
         const fromDate = parseDateDMY(from);
-        if (!fromDate) throw new Error("Invalid from date (use DD/MM/YYYY)");
+        if (!fromDate) throw new ValidationError("Invalid from date (use DD/MM/YYYY or DD-MM-YYYY)");
         range.gte = fromDate;
       }
       if (to) {
         const toDate = parseDateDMY(to);
-        if (!toDate) throw new Error("Invalid to date (use DD/MM/YYYY)");
+        if (!toDate) throw new ValidationError("Invalid to date (use DD/MM/YYYY or DD-MM-YYYY)");
         range.lte = toDate;
       }
     }
@@ -203,7 +205,7 @@ export const getStatement = async (accountId: number, from?: string, to?: string
  withTransaction( async (client) => {
     const account = await accountRepository.findById(client, accountId);
     if (!account) {
-      throw new Error("Account not found");
+      throw new NotFoundError("Account not found");
     }
 
     try {
@@ -211,7 +213,7 @@ export const getStatement = async (accountId: number, from?: string, to?: string
 
     } catch (error: any) {
       if (error.code === 'P2025') {
-        throw new Error("Conflict: The account status was modified by another process. Please try again.");
+        throw new ConflictError("Conflict: The account status was modified by another process. Please try again.");
       }
       throw error;
     }
