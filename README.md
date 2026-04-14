@@ -34,6 +34,8 @@ Server runs on `http://localhost:3000` on default.
 
 (if you encounter "Module not found" errors - try tunning the *npm run prisma:generate* command)
 
+also, copy the .env.example file to a new .env file and populate it with your actual data
+(the DATABASE_URL value should be the relative path to your dev.db file)
 ## Playing with the server
 once the server is runnning, you can change and read data in a simple way through 2 tools I implemented:
 Swagger - a nice UI to run commands
