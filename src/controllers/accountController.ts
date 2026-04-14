@@ -83,8 +83,12 @@ import * as  accountService from "../services/accountService";
     try {
       const result = await accountService.deposit(accountId, amount);
       return res.json(result);
-    } catch (err) {
+    } catch (err: any) {
       const message = err instanceof Error ? err.message : "Unexpected error";
+      if (message.includes("Conflict")) {
+      return res.status(409).json({ error: message });
+    }
+    
       const status = message === "Account not found" ? 404 : 400;
       return res.status(status).json({ error: message });
     }
@@ -113,9 +117,12 @@ import * as  accountService from "../services/accountService";
       const result = await accountService.withdraw(accountId, amount);
       return res.json(result);
 
-    } catch (err) {
+    } catch (err: any) {
       const message = err instanceof Error ? err.message : "Unexpected error";
-      const status = message === "Account not found" ? 404 : 400;
+      if (message.includes("Conflict")) {
+      return res.status(409).json({ error: message });
+    }
+     const status = message === "Account not found" ? 404 : 400;
       return res.status(status).json({ error: message });
     }
   };
@@ -131,8 +138,14 @@ import * as  accountService from "../services/accountService";
     try {
       const account = await accountService.blockAccount(accountId);
       return res.json(account);
-    } catch {
-      return res.status(404).json({ error: "Account not found" });
+    } catch (err: any){
+      const message = err instanceof Error ? err.message : "Unexpected error";
+      if (message.includes("Conflict")) {
+      return res.status(409).json({ error: message });
+    }
+    const status = message === "Account not found" ? 404 : 400;
+    return res.status(status).json({ error: message });
+      
     }
   };
 
@@ -148,8 +161,13 @@ import * as  accountService from "../services/accountService";
     try {
       const account = await accountService.unblockAccount(accountId);
       return res.json(account);
-    } catch {
-      return res.status(404).json({ error: "Account not found" });
+    } catch (err: any){
+      const message = err instanceof Error ? err.message : "Unexpected error";
+      if (message.includes("Conflict")) {
+      return res.status(409).json({ error: message });
+    }
+    const status = message === "Account not found" ? 404 : 400;
+    return res.status(status).json({ error: message });
     }
   };
 

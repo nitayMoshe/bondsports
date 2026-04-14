@@ -1,7 +1,7 @@
 import express from "express";
 import swaggerUi from 'swagger-ui-express';
 import * as swaggerDocument from './swagger.json';
-import accountRoutes from './routes/accountRouts'; // Import your new routes file
+import accountRoutes from './routes/accountRoutes'; // Import your new routes file
 import * as accountController from './controllers/accountController';
 
 export const app = express();
