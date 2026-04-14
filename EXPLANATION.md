@@ -29,3 +29,21 @@ in this project I decided to implement an optimistic locking mechanism by adding
 ## Money representation
 I wanted to be sure Im taking the safe approach representing the money in the DB. after some reading and research, turnes out representing the money as *float* numbers is a very bad idea, since JS looses percision when calculating numbers represented as *float*. so I decided I had to use *integers* to represent the money. in that case, in order to support fractions (cents for example), a number in the DB must represent the smallest coin possible in the country (cents in USA, or agora in Israel). that way, we keep money representation safe while still being able to handle small money ("change"). 
 the final decision was that money will be represented in the DB as *integer*, while the coin represented is "cents" and not "dollars".
+
+## Future Improvements
+There are several improvements I would add in the future to keep the project cleaner and more scalable:
+1 - Input Validation: the code currently validates inputs manually in the controller (e.g. - if (typeof personId !== "number")).
+In the future I would reccommend to use a validation library like Zod, Joi, or class-validator.this would make the code cleaner and use modern validation patterns.
+
+2 - Pagination for Statements:
+If an account is active for years, getStatement command will return thousands of transactions. This is mostly not needed and might cause many problems.
+I would add limit and offset to the getStatement function.
+
+3 - Centralized Error Handling: The project might have a global error handler in app.ts, but the controllers have repetitive try/catch blocks where they manually check if (message === "Account not found") ? 404 : 400.
+I would create custom Error classes (e.g., NotFoundError, ValidationError) and handle the status codes in the global error handler to clean up controllers.
+
+4 - Logging: I would replace console.log and console.error with a proper logging library like winston or pino.
+this is very important in production environment and makes logging a very useful tool to finding and fixing real - time problems.
+
+5 - Pessimistic Locking: th e project implements Optimistic Locking using a version field. This is great for SQLite and small personal projects. However, in a high-concurrency production environment (using PostgreSQL or MySQL), 
+we would want to  use Pessimistic Locking (e.g., SELECT ... FOR UPDATE) during the withdrawal/deposit process. Optimistic locking immediately fails the user's request and asks them to try again if there's a conflict . Pessimistic locking gracefully queues the operations at the database level so the user doesn't experience a failed request.
