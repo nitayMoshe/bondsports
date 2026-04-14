@@ -97,7 +97,7 @@ period filter (optional):
 ## Notes
 - Monetary values are stored as integer units.
 - All money-changing operations run inside database transactions.
-
+_ all monetary amounts are in cents. 1000 = $10.00
 
 
 
