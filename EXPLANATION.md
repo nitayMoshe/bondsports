@@ -41,6 +41,11 @@ Verifying that deposits and balance inquiries reflect real-time database state.
 By implementing these, I’ve made sure that any future code changes or added code won't accidentally break the core banking logic.
 of caurse, tests needs to be updated and added as the project grows and changes.
 
+## Centralized Error Handling
+To create a clean, maintainable, and scalable architecture, I implemented a centralized error handling mechanism. Initially, the controllers were full with  try - catch blocks and manual logic to map specific error strings to HTTP status codes.
+To resolve this, I created custom error classes (such as ValidationError, NotFoundError, and ConflictError) that are thrown directly from the service layer.  by intentionally utilizing Express v5, which natively supports asynchronous error tracking, I was able to completely delete all try/catch from the controllers. Thrown errors are automatically intercepted and formatted by a single, global middlewar e. This approach guarantees consistent API error responses across the application, and leaves the controller code clean.
+
+
 ## Future Improvements
 There are several improvements I would add in the future to keep the project cleaner and more scalable:
 1 - Input Validation: the code currently validates inputs manually in the controller (e.g. - if (typeof personId !== "number")).
@@ -50,11 +55,8 @@ In the future I would reccommend to use a validation library like Zod, Joi, or c
 If an account is active for years, getStatement command will return thousands of transactions. This is mostly not needed and might cause many problems.
 I would add limit and offset to the getStatement function.
 
-3 - Centralized Error Handling: The project might have a global error handler in app.ts, but the controllers have repetitive try/catch blocks where they manually check if (message === "Account not found") ? 404 : 400.
-I would create custom Error classes (e.g., NotFoundError, ValidationError) and handle the status codes in the global error handler to clean up controllers.
-
-4 - Logging: I would replace console.log and console.error with a proper logging library like winston or pino.
+3 - Logging: I would replace console.log and console.error with a proper logging library like winston or pino.
 this is very important in production environment and makes logging a very useful tool to finding and fixing real - time problems.
 
-5 - Pessimistic Locking: th e project implements Optimistic Locking using a version field. This is great for SQLite and small personal projects. However, in a high-concurrency production environment (using PostgreSQL or MySQL), 
+4 - Pessimistic Locking: th e project implements Optimistic Locking using a version field. This is great for SQLite and small personal projects. However, in a high-concurrency production environment (using PostgreSQL or MySQL), 
 we would want to  use Pessimistic Locking (e.g., SELECT ... FOR UPDATE) during the withdrawal/deposit process. Optimistic locking immediately fails the user's request and asks them to try again if there's a conflict . Pessimistic locking gracefully queues the operations at the database level so the user doesn't experience a failed request.
