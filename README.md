@@ -32,6 +32,15 @@ note: the 3 commands above can be run together using the "npm run setup" command
 
 Server runs on `http://localhost:3000` on default.
 
+## Playing with the server
+once the server is runnning, you can change and read data in a simple way through 2 tools I implemented:
+Swagger - a nice UI to run commands
+Prisma studio - a UI to check the db data
+
+Swagger will run automatically, usually on http://localhost:3000/api-docs
+to get to the prisma studio, you should run the command *npx prisma studio*
+
+
 ## Database
 - SQLite file is at `prisma/dev.db`.
 - Seed script creates  one person .
