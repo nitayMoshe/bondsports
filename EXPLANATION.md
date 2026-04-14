@@ -26,3 +26,10 @@ in simple terms - AI is NOT writing your code. its basically a faster, more pers
 
 ## Swagger
 since this project is only backend, I wanted reviewers to have a friendly way to check the server. I remembered I once used a tool called Swagger on one of my projects. I read about it a bit to see I remember how to use it and asked Geemini if there's a similar tool that would be a better fit to my project that I never heard of. when I saw Swagger is my best choice, I added it to my project. its designed to be added in a simple manner that doesnt effect the architecture so adding it was a simple choice of UX, not an actual architectual decision.
+
+
+## locking mechanism
+when dealing with money transactions and account management, it is very important to handle db access correctly.
+we dont want that exactly when a bank admin decides to block a user, this user finishes a withdraw action that overrides the blocking change and resets the "activeFlag" to be true again.
+to deal with that we need some sort of a locking mechanism, so operations that change the data can only happen 1 at a time.
+in this project I decided to implement an optimistic locking mechanism by adding a "version" field to the schema. an operation that tries to change data will first read the version, and once calculating is finished will update the db only if the version is still the same. updating the data will increment the cersion by 1. this ensures that if some other proccess changed the data while the current proccess was calculating, the current proccess will no longer have the correct "version" value and will throw an error to the user saying they should try again.
