@@ -92,7 +92,7 @@ Body:
 `GET /accounts/:id/statement`
 
 period filter (optional):
-`GET /accounts/:id/statement?from=01-01-2026&to=30-01-2026`
+`GET /accounts/:id/statement?from=01/01/2026&to=30/01/2026`
 
 ## Notes
 - Monetary values are stored as integer units.
